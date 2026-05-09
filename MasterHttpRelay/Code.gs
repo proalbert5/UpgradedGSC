@@ -227,12 +227,11 @@ function _buildOpts(req, simple) {
       headers["TE"] = "trailers";
     };
   } else {
-      headers["User-Agent"] = FALLBACK_UA;
-      headers["Accept"] = "*/*";
-      headers["Accept-Language"] = "en-US,en;q=0.9";
-      headers["Accept-Encoding"] = "gzip, deflate";
-      headers["Cache-Control"] = "no-cache";
-    };
+    headers["User-Agent"] = FALLBACK_UA;
+    headers["Accept"] = "*/*";
+    headers["Accept-Language"] = "en-US,en;q=0.9";
+    headers["Accept-Encoding"] = "gzip, deflate";
+    headers["Cache-Control"] = "no-cache";
   };
   if (req.h && typeof req.h === "object") {
     for (var k in req.h) {
