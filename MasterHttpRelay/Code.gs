@@ -258,13 +258,13 @@ var _profiles = null;
 function _getProfile() {
   if (!_profiles) {
     _profiles = [
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "Windows", ver: "148" },
-      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "macOS", ver: "148" },
-      { ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "Linux", ver: "148" },
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0", type: "firefox", plat: "Windows", ver: "137" },
-      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0", type: "firefox", plat: "macOS", ver: "137" },
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "Windows", ver: "149" },
+      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "macOS", ver: "149" },
+      { ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "Linux", ver: "149" },
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0", type: "firefox", plat: "Windows", ver: "138" },
+      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0", type: "firefox", plat: "macOS", ver: "138" },
       { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15", type: "safari", plat: "macOS", ver: "18.5" },
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0", type: "edge", plat: "Windows", ver: "148" }
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0", type: "edge", plat: "Windows", ver: "149" }
     ];
   };
   return _profiles[Math.floor(Math.random() * _profiles.length)];
