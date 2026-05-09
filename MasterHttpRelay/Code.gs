@@ -199,41 +199,39 @@ function _buildOpts(req, simple) {
     escaping: false,
   };
   var headers = { "x-mhr-hop": "1" };
-  if (simple) {
-    headers["User-Agent"] = FALLBACK_UA;
-    headers["Accept"] = "*/*";
-    headers["Accept-Language"] = "en-US,en;q=0.9";
-    headers["Accept-Encoding"] = "gzip, deflate";
-    headers["Cache-Control"] = "no-cache";
-  } else {
-    var p = _getRandomProfile();
-    headers["User-Agent"] = p.ua;
+  if (!simple) {
+    var ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+    headers["User-Agent"] = ua;
     headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8";
     headers["Accept-Language"] = "en-US,en;q=0.9";
     headers["Accept-Encoding"] = "gzip, deflate, br";
     headers["Cache-Control"] = "no-cache";
     headers["DNT"] = "1";
     headers["Upgrade-Insecure-Requests"] = "1";
-    if (p.type === "chrome" || p.type === "edge") {
-      headers["Sec-CH-UA"] = p.type === "chrome"
-        ? `"Google Chrome";v="${p.ver}", "Chromium";v="${p.ver}", "Not_A Brand";v="24"`
-        : `"Microsoft Edge";v="${p.ver}", "Chromium";v="${p.ver}", "Not_A Brand";v="24"`;
+    headers["Connection"] = "keep-alive";
+    // Client hints for Chrome and Firefox
+    if (ua.includes("Chrome/") && !ua.includes("Edg/")) {
+      var version = ua.match(/Chrome\/(\d+)/)[1];
+      var platform = ua.includes("Windows") ? "Windows" : (ua.includes("Mac") ? "macOS" : "Linux");
+      headers["Sec-CH-UA"] = `"Google Chrome";v="${version}", "Chromium";v="${version}", "Not_A Brand";v="24"`;
       headers["Sec-CH-UA-Mobile"] = "?0";
-      headers["Sec-CH-UA-Platform"] = `"${p.plat}"`;
+      headers["Sec-CH-UA-Platform"] = `"${platform}"`;
       headers["Sec-Fetch-Dest"] = "document";
       headers["Sec-Fetch-Mode"] = "navigate";
       headers["Sec-Fetch-Site"] = "none";
       headers["Sec-Fetch-User"] = "?1";
-    } else if (p.type === "firefox") {
+    } else if (ua.includes("Firefox/")) {
       headers["Sec-Fetch-Dest"] = "document";
       headers["Sec-Fetch-Mode"] = "navigate";
       headers["Sec-Fetch-Site"] = "none";
       headers["TE"] = "trailers";
-    } else if (p.type === "safari") {
-      headers["Sec-Fetch-Dest"] = "document";
-      headers["Sec-Fetch-Mode"] = "navigate";
-      headers["Sec-Fetch-Site"] = "none";
-      headers["Sec-Fetch-User"] = "?1";
+    };
+  } else {
+      headers["User-Agent"] = FALLBACK_UA;
+      headers["Accept"] = "*/*";
+      headers["Accept-Language"] = "en-US,en;q=0.9";
+      headers["Accept-Encoding"] = "gzip, deflate";
+      headers["Cache-Control"] = "no-cache";
     };
   };
   if (req.h && typeof req.h === "object") {
