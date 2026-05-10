@@ -34,7 +34,11 @@ const SKIP_HEADERS = {
 };
 
 // If fetchAll fails, only retry methods that are safe to replay.
-const SAFE_REPLAY_METHODS = { GET: 1, HEAD: 1, OPTIONS: 1 };
+const SAFE_REPLAY_METHODS = {
+  GET: 1,
+  HEAD: 1,
+  OPTIONS: 1
+};
 
 // Pattern that matches any Google Apps Script execution endpoint.
 // Used to detect relay loops when an exit node is misconfigured to
@@ -74,13 +78,13 @@ function doPost(e) {
     // Batch mode: { k, q: [...] }
     if (Array.isArray(req.q)) return _doBatch(req.q);
     // Single mode
-    return _json(_doSingleWithFallback(req));
+    return _json(_doSingle(req));
   } catch (err) {
     return _json({ e: String(err) });
   };
 };
 
-function _doSingleWithFallback(req) {
+function _doSingle(req) {
   if (!req.u || typeof req.u !== "string" || !req.u.match(/^https?:\/\//i))
     return { e: "bad url" };
   if (GAS_URL_RE.test(req.u))
@@ -119,18 +123,31 @@ function _doSingleWithFallback(req) {
 };
 
 function _doBatch(items) {
-  var fetchArgs = [], fetchIndex = [], fetchMethods = [], errorMap = {};
+  var fetchArgs = [];
+  var fetchIndex = [];
+  var fetchMethods = [];
+  var errorMap = {};
 
   for (var i = 0; i < items.length; i++) {
     var it = items[i];
-    if (!it || typeof it !== "object") { errorMap[i] = "bad item"; continue; };
-    if (!it.u || typeof it.u !== "string" || !it.u.match(/^https?:\/\//i)) { errorMap[i] = "bad url"; continue; };
+    if (!it || typeof it !== "object") {
+      errorMap[i] = "bad item";
+      continue;
+    };
+    if (!it.u || typeof it.u !== "string" || !it.u.match(/^https?:\/\//i)) {
+      errorMap[i] = "bad url";
+      continue;
+    };
+    if (_GAS_URL_RE.test(item.u)) {
+      errorMap[i] = "loop detected: relay target cannot be a Google Apps Script URL";
+      continue;
+    };
     try {
-      var opts = _buildOpts(it, false);
-      opts.url = it.u;
+      var opts = _buildOpts(item, false);
+      opts.url = item.u;
       fetchArgs.push(opts);
       fetchIndex.push(i);
-      fetchMethods.push(String(it.m || "GET").toUpperCase());
+      fetchMethods.push(String(item.m || "GET").toUpperCase());
     } catch (err) {
       errorMap[i] = String(err);
     };
@@ -141,7 +158,7 @@ function _doBatch(items) {
     try {
       responses = UrlFetchApp.fetchAll(fetchArgs);
     } catch (err) {
-      responses = new Array(fetchArgs.length);
+      responses = [];
       for (var j = 0; j < fetchArgs.length; j++) {
         var method = fetchMethods[j];
         if (!SAFE_REPLAY_METHODS[method]) {
@@ -249,7 +266,9 @@ function _buildOpts(req, simple) {
     if (req.ct) opts.contentType = req.ct;
   };
   // Jitter (5-15ms) to avoid pattern detection
-  Utilities.sleep(Math.floor(Math.random() * 10) + 5);
+  if (!Array.isArray(req.q)) {
+    Utilities.sleep(Math.floor(Math.random() * 10) + 5);
+  };
   return opts;
 };
 
@@ -258,13 +277,13 @@ var _profiles = null;
 function _getProfile() {
   if (!_profiles) {
     _profiles = [
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "Windows", ver: "148" },
-      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "macOS", ver: "148" },
-      { ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", type: "chrome", plat: "Linux", ver: "148" },
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0", type: "firefox", plat: "Windows", ver: "137" },
-      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0", type: "firefox", plat: "macOS", ver: "137" },
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "Windows", ver: "149" },
+      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "macOS", ver: "149" },
+      { ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36", type: "chrome", plat: "Linux", ver: "149" },
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0", type: "firefox", plat: "Windows", ver: "138" },
+      { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0", type: "firefox", plat: "macOS", ver: "138" },
       { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15", type: "safari", plat: "macOS", ver: "18.5" },
-      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0", type: "edge", plat: "Windows", ver: "148" }
+      { ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0", type: "edge", plat: "Windows", ver: "149" }
     ];
   };
   return _profiles[Math.floor(Math.random() * _profiles.length)];
@@ -273,7 +292,7 @@ function _getProfile() {
 function _respHeaders(resp) {
   try {
     if (typeof resp.getAllHeaders === "function") return resp.getAllHeaders();
-  } catch (e) {};
+  } catch (err) {};
   return resp.getHeaders();
 };
 
